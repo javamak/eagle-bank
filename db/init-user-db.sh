@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_SUPERUSER" --dbname "$POSTGRES_SUPERUSER" <<-EOSQL
+
+  CREATE USER ${DB_USER} with encrypted password '${DB_PASSWORD}';
+  CREATE DATABASE ${DB};
+  GRANT ALL PRIVILEGES ON DATABASE ${DB} TO ${DB_USER};
+  ALTER DATABASE ${DB} OWNER TO ${DB_USER};
+  GRANT ALL ON SCHEMA public TO ${DB_USER};
+
+EOSQL
