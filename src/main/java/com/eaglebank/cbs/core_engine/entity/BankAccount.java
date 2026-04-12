@@ -1,16 +1,14 @@
 package com.eaglebank.cbs.core_engine.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.UniqueConstraint;
 
 import java.time.Instant;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,40 +19,34 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(
-    name = "users",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_users_username", columnNames = "username"),
-        @UniqueConstraint(name = "uk_users_email", columnNames = "email")
-    },
+    name = "bank_accounts",
     indexes = {
-        @Index(name = "idx_users_username", columnList = "username"),
-        @Index(name = "idx_users_email", columnList = "email")
+        @Index(name = "idx_bank_accounts_user_id", columnList = "userId")
     }
 )
-public class User {
+public class BankAccount {
 
     @Id
-    private String id;
+    private String accountNumber;
+
+    @Column(nullable = false)
+    private String sortCode;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+    @Column(nullable = false)
+    private String accountType;
 
     @Column(nullable = false)
-    private String password;
-
-    @Embedded
-    private Address address;
+    private Double balance;
 
     @Column(nullable = false)
-    private String phoneNumber;
+    private String currency;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Column(nullable = false)
+    private String userId;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -64,4 +56,8 @@ public class User {
     @Column(nullable = false)
     private Instant updatedTimestamp;
 
+    @Version
+    private Long version;
+
 }
+

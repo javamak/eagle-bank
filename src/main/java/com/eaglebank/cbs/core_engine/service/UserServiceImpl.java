@@ -6,12 +6,15 @@ import com.eaglebank.cbs.core_engine.entity.User;
 import com.eaglebank.cbs.core_engine.model.*;
 import com.eaglebank.cbs.core_engine.repository.UserRepository;
 import com.eaglebank.cbs.core_engine.security.JwtService;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,8 +37,6 @@ public class UserServiceImpl implements UserApiDelegate {
     }
 
     String id = "usr-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-    OffsetDateTime now = OffsetDateTime.now();
-
     User user = new User();
     user.setId(id);
     user.setName(createUserRequest.getName());
@@ -44,14 +45,13 @@ public class UserServiceImpl implements UserApiDelegate {
     user.setAddress(toAddressEntity(createUserRequest.getAddress()));
     user.setPhoneNumber(createUserRequest.getPhoneNumber());
     user.setEmail(createUserRequest.getEmail());
-    user.setCreatedTimestamp(now);
-    user.setUpdatedTimestamp(now);
 
     User saved = userRepository.save(user);
     return ResponseEntity.status(HttpStatus.CREATED).body(toUserResponse(saved));
   }
 
   @Override
+  @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<Void> deleteUserByID(String userId) {
     if (!userRepository.existsById(userId)) {
       return ResponseEntity.notFound().build();
@@ -61,6 +61,7 @@ public class UserServiceImpl implements UserApiDelegate {
   }
 
   @Override
+  @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<UserResponse> fetchUserByID(String userId) {
     return userRepository
         .findById(userId)
@@ -69,6 +70,7 @@ public class UserServiceImpl implements UserApiDelegate {
   }
 
   @Override
+  @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<UserResponse> updateUserByID(
       String userId, UpdateUserRequest updateUserRequest) {
     Optional<User> existing = userRepository.findById(userId);
@@ -96,7 +98,6 @@ public class UserServiceImpl implements UserApiDelegate {
     if (updateUserRequest.getEmail() != null) {
       user.setEmail(updateUserRequest.getEmail());
     }
-    user.setUpdatedTimestamp(OffsetDateTime.now());
 
     User saved = userRepository.save(user);
     return ResponseEntity.ok(toUserResponse(saved));
@@ -132,7 +133,11 @@ public class UserServiceImpl implements UserApiDelegate {
         address,
         user.getPhoneNumber(),
         user.getEmail(),
-        user.getCreatedTimestamp(),
-        user.getUpdatedTimestamp());
+        toOffsetDateTime(user.getCreatedTimestamp()),
+        toOffsetDateTime(user.getUpdatedTimestamp()));
+  }
+
+  private OffsetDateTime toOffsetDateTime(Instant timestamp) {
+    return timestamp == null ? null : timestamp.atOffset(ZoneOffset.UTC);
   }
 }
