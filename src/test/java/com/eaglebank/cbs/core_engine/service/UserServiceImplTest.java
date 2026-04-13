@@ -39,8 +39,8 @@ class UserServiceImplTest {
   void createUser_success_returns201AndMappedResponse() {
     CreateUserRequest request = buildCreateUserRequest();
 
-    when(userRepository.existsByUsernameAndDeletedFalse("testuser")).thenReturn(false);
-    when(userRepository.existsByEmailAndDeletedFalse("test@example.com")).thenReturn(false);
+    when(userRepository.existsByUsername("testuser")).thenReturn(false);
+    when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
     when(userRepository.save(any(User.class)))
         .thenAnswer(
@@ -70,7 +70,7 @@ class UserServiceImplTest {
   @Test
   void createUser_whenUsernameExists_returns409() {
     CreateUserRequest request = buildCreateUserRequest();
-    when(userRepository.existsByUsernameAndDeletedFalse("testuser")).thenReturn(true);
+    when(userRepository.existsByUsername("testuser")).thenReturn(true);
 
     ResponseStatusException ex =
         assertThrows(ResponseStatusException.class, () -> userService.createUser(request));
@@ -82,7 +82,7 @@ class UserServiceImplTest {
   @Test
   void fetchUserByID_whenFound_returns200() {
     User user = buildEntityUser();
-    when(userRepository.findByIdAndDeletedFalse("usr-1")).thenReturn(Optional.of(user));
+    when(userRepository.findById("usr-1")).thenReturn(Optional.of(user));
 
     var response = userService.fetchUserByID("usr-1");
 
@@ -98,7 +98,7 @@ class UserServiceImplTest {
     update.setName("Updated Name");
     update.setPassword("new-password");
 
-    when(userRepository.findByIdAndDeletedFalse("usr-1")).thenReturn(Optional.of(user));
+    when(userRepository.findById("usr-1")).thenReturn(Optional.of(user));
     when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-password");
     when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -111,7 +111,7 @@ class UserServiceImplTest {
 
   @Test
   void deleteUserByID_whenMissing_returns404() {
-    when(userRepository.findByIdAndDeletedFalse("usr-missing")).thenReturn(Optional.empty());
+    when(userRepository.findById("usr-missing")).thenReturn(Optional.empty());
 
     var response = userService.deleteUserByID("usr-missing");
 
@@ -119,16 +119,14 @@ class UserServiceImplTest {
   }
 
   @Test
-  void deleteUserByID_whenFound_softDeletesUser() {
+  void deleteUserByID_whenFound_deletesUser() {
     User user = buildEntityUser();
-    when(userRepository.findByIdAndDeletedFalse("usr-1")).thenReturn(Optional.of(user));
-    when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(userRepository.findById("usr-1")).thenReturn(Optional.of(user));
 
     var response = userService.deleteUserByID("usr-1");
 
     assertEquals(204, response.getStatusCode().value());
-    assertTrue(user.isDeleted());
-    verify(userRepository).save(user);
+    verify(userRepository).delete(user);
   }
 
   private CreateUserRequest buildCreateUserRequest() {

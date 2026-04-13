@@ -53,15 +53,14 @@ public class AccountServiceImpl implements AccountApiDelegate {
   public ResponseEntity<Void> deleteAccountByAccountNumber(String accountNumber) {
     String loggedInUserId = getLoggedUserId();
 
-    BankAccount account = bankAccountRepository.findByAccountNumberAndDeletedFalse(accountNumber)
+    BankAccount account = bankAccountRepository.findById(accountNumber)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
     if (!account.getUserId().equals(loggedInUserId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this account");
     }
 
-    account.setDeleted(true);
-    bankAccountRepository.save(account);
+    bankAccountRepository.delete(account);
     return ResponseEntity.noContent().build();
   }
 
@@ -69,7 +68,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
   public ResponseEntity<BankAccountResponse> fetchAccountByAccountNumber(String accountNumber) {
     String loggedInUserId = getLoggedUserId();
 
-    BankAccount account = bankAccountRepository.findByAccountNumberAndDeletedFalse(accountNumber)
+    BankAccount account = bankAccountRepository.findById(accountNumber)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
     if (!account.getUserId().equals(loggedInUserId)) {
@@ -84,7 +83,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
     String loggedInUserId = getLoggedUserId();
 
     List<BankAccountResponse> accounts = bankAccountRepository
-        .findByUserIdAndDeletedFalse(loggedInUserId)
+        .findByUserId(loggedInUserId)
         .stream()
         .map(this::toBankAccountResponse)
         .toList();
@@ -97,7 +96,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
       String accountNumber, UpdateBankAccountRequest updateBankAccountRequest) {
     String loggedInUserId = getLoggedUserId();
 
-    BankAccount account = bankAccountRepository.findByAccountNumberAndDeletedFalse(accountNumber)
+    BankAccount account = bankAccountRepository.findById(accountNumber)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
     if (!account.getUserId().equals(loggedInUserId)) {

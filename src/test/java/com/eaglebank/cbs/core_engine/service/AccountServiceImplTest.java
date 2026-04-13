@@ -1,7 +1,6 @@
 package com.eaglebank.cbs.core_engine.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -73,8 +72,7 @@ class AccountServiceImplTest {
   @Test
   void fetchAccountByAccountNumber_whenOwned_returns200() {
     BankAccount account = buildAccount("01234567", "usr-1", "Original");
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
 
     var response = accountService.fetchAccountByAccountNumber("01234567");
 
@@ -85,8 +83,7 @@ class AccountServiceImplTest {
   @Test
   void fetchAccountByAccountNumber_whenNotOwned_returns403() {
     BankAccount account = buildAccount("01234567", "usr-2", "Original");
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
 
     ResponseStatusException ex =
         assertThrows(
@@ -101,7 +98,7 @@ class AccountServiceImplTest {
     BankAccount first = buildAccount("01234567", "usr-1", "A1");
     BankAccount second = buildAccount("01765432", "usr-1", "A2");
 
-    when(bankAccountRepository.findByUserIdAndDeletedFalse("usr-1")).thenReturn(List.of(first, second));
+    when(bankAccountRepository.findByUserId("usr-1")).thenReturn(List.of(first, second));
 
     var response = accountService.listAccounts();
 
@@ -118,8 +115,7 @@ class AccountServiceImplTest {
     request.setName("New Name");
     request.setAccountType(UpdateBankAccountRequest.AccountTypeEnum.PERSONAL);
 
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
     when(bankAccountRepository.save(any(BankAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     var response = accountService.updateAccountByAccountNumber("01234567", request);
@@ -130,17 +126,14 @@ class AccountServiceImplTest {
   }
 
   @Test
-  void deleteAccountByAccountNumber_whenOwned_softDeletesAccount() {
+  void deleteAccountByAccountNumber_whenOwned_deletesAccount() {
     BankAccount account = buildAccount("01234567", "usr-1", "Original");
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
-    when(bankAccountRepository.save(any(BankAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
 
     var response = accountService.deleteAccountByAccountNumber("01234567");
 
     assertEquals(204, response.getStatusCode().value());
-    assertTrue(account.isDeleted());
-    verify(bankAccountRepository).save(account);
+    verify(bankAccountRepository).delete(account);
   }
 
   private BankAccount buildAccount(String accountNumber, String userId, String name) {

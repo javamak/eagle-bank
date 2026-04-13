@@ -60,9 +60,8 @@ class TransactionServiceImplTest {
             CreateTransactionRequest.CurrencyEnum.GBP,
             CreateTransactionRequest.TypeEnum.DEPOSIT);
 
-    when(userRepository.findByUsernameAndDeletedFalse("testuser")).thenReturn(Optional.of(user));
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
     when(bankAccountRepository.saveAndFlush(any(BankAccount.class))).thenAnswer(inv -> inv.getArgument(0));
     when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -87,9 +86,8 @@ class TransactionServiceImplTest {
             CreateTransactionRequest.CurrencyEnum.GBP,
             CreateTransactionRequest.TypeEnum.WITHDRAWAL);
 
-    when(userRepository.findByUsernameAndDeletedFalse("testuser")).thenReturn(Optional.of(user));
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
 
     ResponseStatusException ex =
         assertThrows(
@@ -110,9 +108,8 @@ class TransactionServiceImplTest {
             CreateTransactionRequest.CurrencyEnum.GBP,
             CreateTransactionRequest.TypeEnum.DEPOSIT);
 
-    when(userRepository.findByUsernameAndDeletedFalse("testuser")).thenReturn(Optional.of(user));
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
 
     ResponseStatusException ex =
         assertThrows(
@@ -132,9 +129,8 @@ class TransactionServiceImplTest {
             CreateTransactionRequest.CurrencyEnum.GBP,
             CreateTransactionRequest.TypeEnum.DEPOSIT);
 
-    when(userRepository.findByUsernameAndDeletedFalse("testuser")).thenReturn(Optional.of(user));
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
     when(bankAccountRepository.saveAndFlush(any(BankAccount.class)))
         .thenThrow(new ObjectOptimisticLockingFailureException(BankAccount.class, "01234567"));
 
@@ -161,10 +157,9 @@ class TransactionServiceImplTest {
     tx.setType("deposit");
     tx.setCreatedTimestamp(Instant.now());
 
-    when(userRepository.findByUsernameAndDeletedFalse("testuser")).thenReturn(Optional.of(user));
-    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
-        .thenReturn(Optional.of(account));
-    when(transactionRepository.findByAccountNumberAndDeletedFalse("01234567")).thenReturn(List.of(tx));
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
+    when(transactionRepository.findByAccountNumber("01234567")).thenReturn(List.of(tx));
 
     var response = transactionService.listAccountTransaction("01234567");
 
