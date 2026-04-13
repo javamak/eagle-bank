@@ -1,6 +1,7 @@
 package com.eaglebank.cbs.core_engine.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -138,7 +139,7 @@ class AccountServiceImplTest {
     var response = accountService.deleteAccountByAccountNumber("01234567");
 
     assertEquals(204, response.getStatusCode().value());
-    assertEquals(true, account.isDeleted());
+    assertTrue(account.isDeleted());
     verify(bankAccountRepository).save(account);
   }
 
