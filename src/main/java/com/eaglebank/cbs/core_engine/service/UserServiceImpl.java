@@ -53,10 +53,11 @@ public class UserServiceImpl implements UserApiDelegate {
   @Override
   @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<Void> deleteUserByID(String userId) {
-    if (!userRepository.existsById(userId)) {
+    Optional<User> existing = userRepository.findById(userId);
+    if (existing.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    userRepository.deleteById(userId);
+    userRepository.delete(existing.get());
     return ResponseEntity.noContent().build();
   }
 

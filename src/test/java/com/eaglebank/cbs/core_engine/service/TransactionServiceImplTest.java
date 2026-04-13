@@ -190,4 +190,3 @@ class TransactionServiceImplTest {
     return account;
   }
 }
-

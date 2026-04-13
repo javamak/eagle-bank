@@ -125,6 +125,17 @@ class AccountServiceImplTest {
     assertEquals("personal", account.getAccountType());
   }
 
+  @Test
+  void deleteAccountByAccountNumber_whenOwned_deletesAccount() {
+    BankAccount account = buildAccount("01234567", "usr-1", "Original");
+    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
+
+    var response = accountService.deleteAccountByAccountNumber("01234567");
+
+    assertEquals(204, response.getStatusCode().value());
+    verify(bankAccountRepository).delete(account);
+  }
+
   private BankAccount buildAccount(String accountNumber, String userId, String name) {
     BankAccount account = new BankAccount();
     account.setAccountNumber(accountNumber);
@@ -139,4 +150,3 @@ class AccountServiceImplTest {
     return account;
   }
 }
-

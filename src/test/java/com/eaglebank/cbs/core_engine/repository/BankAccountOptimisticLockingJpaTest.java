@@ -92,4 +92,3 @@ class BankAccountOptimisticLockingJpaTest {
     assertEquals(409, ex.getStatusCode().value());
   }
 }
-

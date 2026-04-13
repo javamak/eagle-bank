@@ -111,11 +111,22 @@ class UserServiceImplTest {
 
   @Test
   void deleteUserByID_whenMissing_returns404() {
-    when(userRepository.existsById("usr-missing")).thenReturn(false);
+    when(userRepository.findById("usr-missing")).thenReturn(Optional.empty());
 
     var response = userService.deleteUserByID("usr-missing");
 
     assertEquals(404, response.getStatusCode().value());
+  }
+
+  @Test
+  void deleteUserByID_whenFound_deletesUser() {
+    User user = buildEntityUser();
+    when(userRepository.findById("usr-1")).thenReturn(Optional.of(user));
+
+    var response = userService.deleteUserByID("usr-1");
+
+    assertEquals(204, response.getStatusCode().value());
+    verify(userRepository).delete(user);
   }
 
   private CreateUserRequest buildCreateUserRequest() {
@@ -146,4 +157,3 @@ class UserServiceImplTest {
     return user;
   }
 }
-

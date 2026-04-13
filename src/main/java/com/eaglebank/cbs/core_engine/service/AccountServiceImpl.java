@@ -60,7 +60,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this account");
     }
 
-    bankAccountRepository.deleteById(accountNumber);
+    bankAccountRepository.delete(account);
     return ResponseEntity.noContent().build();
   }
 

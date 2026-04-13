@@ -12,4 +12,3 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 
     Optional<Transaction> findByIdAndAccountNumber(String id, String accountNumber);
 }
-
