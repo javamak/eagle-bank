@@ -26,8 +26,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(
     name = "bank_accounts",
     indexes = {
-        @Index(name = "idx_bank_accounts_user_id", columnList = "userId"),
-        @Index(name = "idx_bank_accounts_account_number", columnList = "accountNumber")
+        @Index(name = "idx_bank_accounts_user_id", columnList = "userId")
     }
 )
 public class BankAccount {

@@ -122,7 +122,10 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
     }
 
     private String getAuthenticatedUser() {
-        return  (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
+                .getId();
     }
 
     private TransactionResponse toTransactionResponse(Transaction transaction) {

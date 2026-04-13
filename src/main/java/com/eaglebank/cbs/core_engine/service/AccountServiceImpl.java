@@ -53,7 +53,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
   public ResponseEntity<Void> deleteAccountByAccountNumber(String accountNumber) {
     String loggedInUserId = getLoggedUserId();
 
-    BankAccount account = bankAccountRepository.findByAccountNumber(accountNumber)
+    BankAccount account = bankAccountRepository.findById(accountNumber)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
     if (!account.getUserId().equals(loggedInUserId)) {
@@ -68,7 +68,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
   public ResponseEntity<BankAccountResponse> fetchAccountByAccountNumber(String accountNumber) {
     String loggedInUserId = getLoggedUserId();
 
-    BankAccount account = bankAccountRepository.findByAccountNumber(accountNumber)
+    BankAccount account = bankAccountRepository.findById(accountNumber)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
     if (!account.getUserId().equals(loggedInUserId)) {
@@ -96,7 +96,7 @@ public class AccountServiceImpl implements AccountApiDelegate {
       String accountNumber, UpdateBankAccountRequest updateBankAccountRequest) {
     String loggedInUserId = getLoggedUserId();
 
-    BankAccount account = bankAccountRepository.findByAccountNumber(accountNumber)
+    BankAccount account = bankAccountRepository.findById(accountNumber)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
     if (!account.getUserId().equals(loggedInUserId)) {
