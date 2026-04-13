@@ -39,12 +39,12 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
     public ResponseEntity<TransactionResponse> createTransaction(
             String accountNumber, CreateTransactionRequest request) {
 
-        User loggedInUser = getAuthenticatedUser();
+        String loggedInUser = getAuthenticatedUser();
 
         BankAccount account = bankAccountRepository.findById(accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
-        if (!account.getUserId().equals(loggedInUser.getId())) {
+        if (!account.getUserId().equals(loggedInUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to transact on this account");
         }
 
@@ -71,7 +71,7 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
         Transaction transaction = new Transaction();
         transaction.setId(id);
         transaction.setAccountNumber(accountNumber);
-        transaction.setUserId(loggedInUser.getId());
+        transaction.setUserId(loggedInUser);
         transaction.setAmount(amount);
         transaction.setCurrency(request.getCurrency().getValue());
         transaction.setType(request.getType().getValue());
@@ -85,12 +85,12 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
     public ResponseEntity<TransactionResponse> fetchAccountTransactionByID(
             String accountNumber, String transactionId) {
 
-        User loggedInUser = getAuthenticatedUser();
+        String loggedInUser = getAuthenticatedUser();
 
         BankAccount account = bankAccountRepository.findById(accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
-        if (!account.getUserId().equals(loggedInUser.getId())) {
+        if (!account.getUserId().equals(loggedInUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this account's transactions");
         }
 
@@ -103,12 +103,12 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
     @Override
     public ResponseEntity<ListTransactionsResponse> listAccountTransaction(String accountNumber) {
 
-        User loggedInUser = getAuthenticatedUser();
+        String userId = getAuthenticatedUser();
 
         BankAccount account = bankAccountRepository.findById(accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
-        if (!account.getUserId().equals(loggedInUser.getId())) {
+        if (!account.getUserId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this account's transactions");
         }
 
@@ -121,10 +121,8 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
         return ResponseEntity.ok(new ListTransactionsResponse(transactions));
     }
 
-    private User getAuthenticatedUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    private String getAuthenticatedUser() {
+        return  (String)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     private TransactionResponse toTransactionResponse(Transaction transaction) {
