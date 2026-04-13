@@ -41,7 +41,7 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
 
         User loggedInUser = getAuthenticatedUser();
 
-        BankAccount account = bankAccountRepository.findById(accountNumber)
+        BankAccount account = bankAccountRepository.findByAccountNumberAndDeletedFalse(accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
         if (!account.getUserId().equals(loggedInUser.getId())) {
@@ -87,14 +87,14 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
 
         User loggedInUser = getAuthenticatedUser();
 
-        BankAccount account = bankAccountRepository.findById(accountNumber)
+        BankAccount account = bankAccountRepository.findByAccountNumberAndDeletedFalse(accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
         if (!account.getUserId().equals(loggedInUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this account's transactions");
         }
 
-        Transaction transaction = transactionRepository.findByIdAndAccountNumber(transactionId, accountNumber)
+        Transaction transaction = transactionRepository.findByIdAndAccountNumberAndDeletedFalse(transactionId, accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaction not found"));
 
         return ResponseEntity.ok(toTransactionResponse(transaction));
@@ -105,7 +105,7 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
 
         User loggedInUser = getAuthenticatedUser();
 
-        BankAccount account = bankAccountRepository.findById(accountNumber)
+        BankAccount account = bankAccountRepository.findByAccountNumberAndDeletedFalse(accountNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank account not found"));
 
         if (!account.getUserId().equals(loggedInUser.getId())) {
@@ -113,7 +113,7 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
         }
 
         List<TransactionResponse> transactions = transactionRepository
-                .findByAccountNumber(accountNumber)
+                .findByAccountNumberAndDeletedFalse(accountNumber)
                 .stream()
                 .map(this::toTransactionResponse)
                 .toList();
@@ -123,7 +123,7 @@ public class TransactionServiceImpl implements TransactionApiDelegate {
 
     private User getAuthenticatedUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsernameAndDeletedFalse(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
     }
 

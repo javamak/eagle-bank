@@ -72,7 +72,8 @@ class AccountServiceImplTest {
   @Test
   void fetchAccountByAccountNumber_whenOwned_returns200() {
     BankAccount account = buildAccount("01234567", "usr-1", "Original");
-    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
+    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
+        .thenReturn(Optional.of(account));
 
     var response = accountService.fetchAccountByAccountNumber("01234567");
 
@@ -83,7 +84,8 @@ class AccountServiceImplTest {
   @Test
   void fetchAccountByAccountNumber_whenNotOwned_returns403() {
     BankAccount account = buildAccount("01234567", "usr-2", "Original");
-    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
+    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
+        .thenReturn(Optional.of(account));
 
     ResponseStatusException ex =
         assertThrows(
@@ -98,7 +100,7 @@ class AccountServiceImplTest {
     BankAccount first = buildAccount("01234567", "usr-1", "A1");
     BankAccount second = buildAccount("01765432", "usr-1", "A2");
 
-    when(bankAccountRepository.findByUserId("usr-1")).thenReturn(List.of(first, second));
+    when(bankAccountRepository.findByUserIdAndDeletedFalse("usr-1")).thenReturn(List.of(first, second));
 
     var response = accountService.listAccounts();
 
@@ -115,7 +117,8 @@ class AccountServiceImplTest {
     request.setName("New Name");
     request.setAccountType(UpdateBankAccountRequest.AccountTypeEnum.PERSONAL);
 
-    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
+    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
+        .thenReturn(Optional.of(account));
     when(bankAccountRepository.save(any(BankAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     var response = accountService.updateAccountByAccountNumber("01234567", request);
@@ -123,6 +126,20 @@ class AccountServiceImplTest {
     assertEquals(200, response.getStatusCode().value());
     assertEquals("New Name", response.getBody().getName());
     assertEquals("personal", account.getAccountType());
+  }
+
+  @Test
+  void deleteAccountByAccountNumber_whenOwned_softDeletesAccount() {
+    BankAccount account = buildAccount("01234567", "usr-1", "Original");
+    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
+        .thenReturn(Optional.of(account));
+    when(bankAccountRepository.save(any(BankAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    var response = accountService.deleteAccountByAccountNumber("01234567");
+
+    assertEquals(204, response.getStatusCode().value());
+    assertEquals(true, account.isDeleted());
+    verify(bankAccountRepository).save(account);
   }
 
   private BankAccount buildAccount(String accountNumber, String userId, String name) {
@@ -139,4 +156,3 @@ class AccountServiceImplTest {
     return account;
   }
 }
-

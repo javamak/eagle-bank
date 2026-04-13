@@ -64,4 +64,7 @@ public class User {
     @Column(nullable = false)
     private Instant updatedTimestamp;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
 }

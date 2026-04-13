@@ -29,10 +29,10 @@ public class UserServiceImpl implements UserApiDelegate {
 
   @Override
   public ResponseEntity<UserResponse> createUser(CreateUserRequest createUserRequest) {
-    if (userRepository.existsByUsername(createUserRequest.getUsername())) {
+    if (userRepository.existsByUsernameAndDeletedFalse(createUserRequest.getUsername())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
     }
-    if (userRepository.existsByEmail(createUserRequest.getEmail())) {
+    if (userRepository.existsByEmailAndDeletedFalse(createUserRequest.getEmail())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
     }
 
@@ -53,10 +53,13 @@ public class UserServiceImpl implements UserApiDelegate {
   @Override
   @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<Void> deleteUserByID(String userId) {
-    if (!userRepository.existsById(userId)) {
+    Optional<User> existing = userRepository.findByIdAndDeletedFalse(userId);
+    if (existing.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    userRepository.deleteById(userId);
+    User user = existing.get();
+    user.setDeleted(true);
+    userRepository.save(user);
     return ResponseEntity.noContent().build();
   }
 
@@ -64,7 +67,7 @@ public class UserServiceImpl implements UserApiDelegate {
   @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<UserResponse> fetchUserByID(String userId) {
     return userRepository
-        .findById(userId)
+        .findByIdAndDeletedFalse(userId)
         .map(user -> ResponseEntity.ok(toUserResponse(user)))
         .orElse(ResponseEntity.notFound().build());
   }
@@ -73,7 +76,7 @@ public class UserServiceImpl implements UserApiDelegate {
   @PreAuthorize("#userId == authentication.principal")
   public ResponseEntity<UserResponse> updateUserByID(
       String userId, UpdateUserRequest updateUserRequest) {
-    Optional<User> existing = userRepository.findById(userId);
+    Optional<User> existing = userRepository.findByIdAndDeletedFalse(userId);
     if (existing.isEmpty()) {
       return ResponseEntity.notFound().build();
     }

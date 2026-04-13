@@ -23,7 +23,7 @@ public class AuthenticationServiceImpl implements AuthApiDelegate {
 
   @Override
   public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
-    Optional<User> user = userRepository.findByUsername(loginRequest.getUsername());
+    Optional<User> user = userRepository.findByUsernameAndDeletedFalse(loginRequest.getUsername());
     if (user.isEmpty()
         || !passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

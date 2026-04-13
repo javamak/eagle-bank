@@ -59,5 +59,7 @@ public class BankAccount {
     @Version
     private Long version;
 
-}
+    @Column(nullable = false)
+    private boolean deleted = false;
 
+}

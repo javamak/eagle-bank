@@ -67,8 +67,9 @@ class BankAccountOptimisticLockingJpaTest {
             CreateTransactionRequest.CurrencyEnum.GBP,
             CreateTransactionRequest.TypeEnum.DEPOSIT);
 
-    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-    when(bankAccountRepository.findById("01234567")).thenReturn(Optional.of(account));
+    when(userRepository.findByUsernameAndDeletedFalse("testuser")).thenReturn(Optional.of(user));
+    when(bankAccountRepository.findByAccountNumberAndDeletedFalse("01234567"))
+        .thenReturn(Optional.of(account));
 
     AtomicInteger saveCount = new AtomicInteger();
     when(bankAccountRepository.saveAndFlush(any(BankAccount.class)))
@@ -92,4 +93,3 @@ class BankAccountOptimisticLockingJpaTest {
     assertEquals(409, ex.getStatusCode().value());
   }
 }
-

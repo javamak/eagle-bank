@@ -51,5 +51,7 @@ public class Transaction {
     @Column(nullable = false, updatable = false)
     private Instant createdTimestamp;
 
-}
+    @Column(nullable = false)
+    private boolean deleted = false;
 
+}
